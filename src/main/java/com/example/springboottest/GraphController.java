@@ -50,7 +50,7 @@ public class GraphController {
 
 		osClient.batch().jobs().create(aJob);
 
-		return new Graph(counter.incrementAndGet(), "Graph added");
+		return new Graph(counter.incrementAndGet(), "Graph returned");
 	}
 
 	@PostMapping("/addGraph")
