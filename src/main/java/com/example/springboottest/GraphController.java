@@ -1,6 +1,8 @@
 package com.example.springboottest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,7 +24,7 @@ public class GraphController {
 	private final AtomicLong counter = new AtomicLong();
 
 	@GetMapping("/graphs")
-	public Graph graph(@RequestParam(value = "name", defaultValue = "gaffer") String name) {
+	public List<Graph> graph(@RequestParam(value = "name", defaultValue = "gaffer") String name) {
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 
 		int randomNumber = ThreadLocalRandom.current().nextInt();
@@ -50,8 +52,9 @@ public class GraphController {
 				.endSpec().build();
 
 		osClient.batch().jobs().create(aJob);
-
-		return new Graph("RoadTraffic", "Graph returned");
+		ArrayList<Graph> graphList = new ArrayList<>();
+		graphList.add(new Graph("OurGraph", "YES"));
+		return graphList;
 	}
 
 	@PostMapping("/addGraph")
