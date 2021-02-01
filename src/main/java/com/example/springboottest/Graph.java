@@ -2,19 +2,21 @@ package com.example.springboottest;
 
 public class Graph {
 
-	private final long id;
-	private final String content;
-
-	public Graph(long id, String content) {
-		this.id = id;
-		this.content = content;
+	public String getGraphName() {
+		return graphName;
 	}
 
-	public long getId() {
-		return id;
+	public String getCurrentState() {
+		return currentState;
 	}
 
-	public String getContent() {
-		return content;
+	private final String graphName;
+	private final String currentState;
+
+	public Graph(String graphName, String currentState) {
+		this.graphName = graphName;
+		this.currentState = currentState;
 	}
+
+
 }

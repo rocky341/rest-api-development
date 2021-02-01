@@ -14,13 +14,14 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin
 @RestController
 public class GraphController {
 
 	private static final String template = "Hello, %s!";
 	private final AtomicLong counter = new AtomicLong();
 
-	@GetMapping("/getGraph")
+	@GetMapping("/graphs")
 	public Graph graph(@RequestParam(value = "name", defaultValue = "gaffer") String name) {
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 
@@ -50,7 +51,7 @@ public class GraphController {
 
 		osClient.batch().jobs().create(aJob);
 
-		return new Graph(counter.incrementAndGet(), "Graph returned");
+		return new Graph("RoadTraffic", "Graph returned");
 	}
 
 	@PostMapping("/addGraph")
@@ -72,7 +73,12 @@ public class GraphController {
 				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
 		// Create Custom Resource
 		osClient.customResource(context).create("default", dummyObject);
-		return new Graph(counter.incrementAndGet(), "Graph added");
+		return new Graph("RoadTraffic", "Graph added");
+	}
+
+	@PostMapping("/auth")
+	public String auth(){
+		return "my-dev-secret";
 	}
 
 	@DeleteMapping("/deleteGraph/{id}")
