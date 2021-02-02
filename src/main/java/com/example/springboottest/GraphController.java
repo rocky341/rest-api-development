@@ -1,6 +1,8 @@
 package com.example.springboottest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
@@ -12,16 +14,33 @@ import io.fabric8.kubernetes.client.dsl.base.CustomResourceDefinitionContext;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@RequestMapping("/")
 public class GraphController {
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
+
+	@Autowired
+	private JwtUserDetailsService userDetailsService;
 
 	private static final String template = "Hello, %s!";
 	private final AtomicLong counter = new AtomicLong();
 
-	@GetMapping("/getGraph")
-	public Graph graph(@RequestParam(value = "name", defaultValue = "gaffer") String name) {
+	@GetMapping("graphs")
+	public List<Graph> graph(@RequestParam(value = "name", defaultValue = "gaffer") String name) {
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 
 		int randomNumber = ThreadLocalRandom.current().nextInt();
@@ -49,11 +68,12 @@ public class GraphController {
 				.endSpec().build();
 
 		osClient.batch().jobs().create(aJob);
-
-		return new Graph(counter.incrementAndGet(), "Graph returned");
+		ArrayList<Graph> graphList = new ArrayList<>();
+		graphList.add(new Graph("OurGraph", "YES"));
+		return graphList;
 	}
 
-	@PostMapping("/addGraph")
+	@PostMapping("addGraph")
 	public Graph graph(@RequestBody Graph graph) throws IOException {
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 		// Create Custom Resource Context
@@ -72,10 +92,33 @@ public class GraphController {
 				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
 		// Create Custom Resource
 		osClient.customResource(context).create("default", dummyObject);
-		return new Graph(counter.incrementAndGet(), "Graph added");
+		return new Graph("RoadTraffic", "Graph added");
 	}
 
-	@DeleteMapping("/deleteGraph/{id}")
+	@PostMapping("auth")
+	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+
+		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+
+		final UserDetails userDetails = userDetailsService
+				.loadUserByUsername(authenticationRequest.getUsername());
+
+		final String token = jwtTokenUtil.generateToken(userDetails);
+
+		return ResponseEntity.ok(new JwtResponse(token));
+	}
+
+	private void authenticate(String username, String password) throws Exception {
+		try {
+			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+		} catch (DisabledException e) {
+			throw new Exception("USER_DISABLED", e);
+		} catch (BadCredentialsException e) {
+			throw new Exception("INVALID_CREDENTIALS", e);
+		}
+	}
+
+	@DeleteMapping("deleteGraph/{id}")
 	public String deleteGraph(@PathVariable Long id){
 		return "Record Deleted " + id;
 	}
