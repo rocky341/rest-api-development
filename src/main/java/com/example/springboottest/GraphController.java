@@ -22,8 +22,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@RequestMapping("/")
 public class GraphController {
 
 	@Autowired
@@ -38,7 +39,7 @@ public class GraphController {
 	private static final String template = "Hello, %s!";
 	private final AtomicLong counter = new AtomicLong();
 
-	@GetMapping("/graphs")
+	@GetMapping("graphs")
 	public List<Graph> graph(@RequestParam(value = "name", defaultValue = "gaffer") String name) {
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 
@@ -72,7 +73,7 @@ public class GraphController {
 		return graphList;
 	}
 
-	@PostMapping("/addGraph")
+	@PostMapping("addGraph")
 	public Graph graph(@RequestBody Graph graph) throws IOException {
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 		// Create Custom Resource Context
@@ -94,7 +95,7 @@ public class GraphController {
 		return new Graph("RoadTraffic", "Graph added");
 	}
 
-	@RequestMapping(value = "/auth", method = RequestMethod.POST)
+	@PostMapping("auth")
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
 
 		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
@@ -117,7 +118,7 @@ public class GraphController {
 		}
 	}
 
-	@DeleteMapping("/deleteGraph/{id}")
+	@DeleteMapping("deleteGraph/{id}")
 	public String deleteGraph(@PathVariable Long id){
 		return "Record Deleted " + id;
 	}
