@@ -119,7 +119,9 @@ public class GraphController {
 	}
 
 	@DeleteMapping("deleteGraph/{id}")
-	public String deleteGraph(@PathVariable Long id){
-		return "Record Deleted " + id;
+	public String deleteGraph(@PathVariable String id){
+		OpenShiftClient osClient = new DefaultOpenShiftClient();
+		Boolean deleted = osClient.customResourceDefinitions().withName(id).delete();
+		return "Record Deleted " + deleted;
 	}
 }
