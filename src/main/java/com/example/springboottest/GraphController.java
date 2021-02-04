@@ -73,26 +73,27 @@ public class GraphController {
 		return graphList;
 	}
 
-	@PostMapping("addGraph")
-	public Graph graph(@RequestBody Graph graph) throws IOException {
-		OpenShiftClient osClient = new DefaultOpenShiftClient();
-		// Create Custom Resource Context
-		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
-				.Builder()
-				.withGroup("gchq.gov.uk")
-				.withKind("Gaffer")
-				.withName("gaffers.gchq.gov.uk")
-				.withPlural("gaffers")
-				.withScope("Namespaced")
-				.withVersion("v1")
-				.build();
-
-		// Load from Yaml
-		Map<String, Object> dummyObject = osClient.customResource(context)
-				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
-		// Create Custom Resource
-		osClient.customResource(context).create("default", dummyObject);
-		return new Graph("RoadTraffic", "Graph added");
+	@PostMapping(
+			path = "addGraph", consumes = "application/json", produces = "application/json")
+	public ResponseEntity<?> graph(@RequestBody Graph graph) throws IOException {
+//		OpenShiftClient osClient = new DefaultOpenShiftClient();
+//		// Create Custom Resource Context
+//		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
+//				.Builder()
+//				.withGroup("gchq.gov.uk")
+//				.withKind("Gaffer")
+//				.withName("gaffers.gchq.gov.uk")
+//				.withPlural("gaffers")
+//				.withScope("Namespaced")
+//				.withVersion("v1")
+//				.build();
+//
+//		// Load from Yaml
+//		Map<String, Object> dummyObject = osClient.customResource(context)
+//				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
+//		// Create Custom Resource
+//		osClient.customResource(context).create("default", dummyObject);
+		return ResponseEntity.ok(new Graph(graph.getGraphName(), graph.getCurrentState()));
 	}
 
 	@PostMapping("auth")

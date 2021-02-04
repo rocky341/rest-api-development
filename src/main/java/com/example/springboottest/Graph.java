@@ -2,6 +2,21 @@ package com.example.springboottest;
 
 public class Graph {
 
+	private  String graphName;
+	private  String currentState;
+
+	public Graph() {
+	}
+	public Graph(String graphName, String currentState) {
+		this.graphName = graphName;
+		this.currentState = currentState;
+	}
+
+
+	public  void setGraphName(String graphName) {
+		this.graphName = graphName;
+	}
+
 	public String getGraphName() {
 		return graphName;
 	}
@@ -10,13 +25,8 @@ public class Graph {
 		return currentState;
 	}
 
-	private final String graphName;
-	private final String currentState;
-
-	public Graph(String graphName, String currentState) {
-		this.graphName = graphName;
+	public  void setCurrentState(String currentState) {
 		this.currentState = currentState;
 	}
-
 
 }
