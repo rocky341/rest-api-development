@@ -24,6 +24,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -77,38 +78,39 @@ public class GraphController {
 		return graphList;
 	}
 
-	@PostMapping(
-			path = "addGraph", consumes = "application/json", produces = "application/json")
+	@PostMapping(path = "addGraph", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<?> graph(@RequestBody Graph graph) throws IOException {
+
+		File addGafferFile = new File("src/main/resources/add-gaffer.yaml");
 
 		//Update add-graffer.yaml file
 		// Create an ObjectMapper mapper for YAML
 		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         // Parse the YAML file
-		ObjectNode root = (ObjectNode) mapper.readTree(new File("/Users/faisalisse/Training/rest-api-development/src/main/resources/add-gaffer.yaml"));
+		ObjectNode root = (ObjectNode) mapper.readTree(addGafferFile);
 		ObjectNode jsonNode = (ObjectNode)root.findPath("config");
 		jsonNode.put("graphId", graph.getGraphId());
 		jsonNode.put("description", graph.getDescription());
 		// Write changes to the YAML file
-		mapper.writer().writeValue(new File("/Users/faisalisse/Training/rest-api-development/src/main/resources/add-gaffer.yaml"), root);
+		mapper.writer().writeValue(addGafferFile, root);
 
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 		// Create Custom Resource Context
-//		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
-//				.Builder()
-//				.withGroup("gchq.gov.uk")
-//				.withKind("Gaffer")
-//				.withName("gaffers.gchq.gov.uk")
-//				.withPlural("gaffers")
-//				.withScope("Namespaced")
-//				.withVersion("v1")
-//				.build();
-//
-//		// Load from Yaml
-//		Map<String, Object> dummyObject = osClient.customResource(context)
-//				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
-//		// Create Custom Resource
-//		osClient.customResource(context).create("default", dummyObject);
+		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
+				.Builder()
+				.withGroup("gchq.gov.uk")
+				.withKind("Gaffer")
+				.withName("gaffers.gchq.gov.uk")
+				.withPlural("gaffers")
+				.withScope("Namespaced")
+				.withVersion("v1")
+				.build();
+		// Load from Yaml
+		Map<String, Object> dummyObject = osClient.customResource(context)
+				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
+		// Create Custom Resource
+		osClient.customResource(context).create("default", dummyObject);
+
 		return ResponseEntity.ok(new Graph(graph.getGraphId(), graph.getDescription()));
 	}
 
