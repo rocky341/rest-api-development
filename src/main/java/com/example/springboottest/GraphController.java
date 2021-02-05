@@ -1,5 +1,6 @@
 package com.example.springboottest;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +8,9 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.batch.Job;
 import io.fabric8.kubernetes.api.model.batch.JobBuilder;
@@ -76,8 +80,20 @@ public class GraphController {
 	@PostMapping(
 			path = "addGraph", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<?> graph(@RequestBody Graph graph) throws IOException {
-//		OpenShiftClient osClient = new DefaultOpenShiftClient();
-//		// Create Custom Resource Context
+
+		//Update add-graffer.yaml file
+		// Create an ObjectMapper mapper for YAML
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        // Parse the YAML file
+		ObjectNode root = (ObjectNode) mapper.readTree(new File("/Users/faisalisse/Training/rest-api-development/src/main/resources/add-gaffer.yaml"));
+		ObjectNode jsonNode = (ObjectNode)root.findPath("config");
+		jsonNode.put("graphId", graph.getGraphId());
+		jsonNode.put("description", graph.getDescription());
+		// Write changes to the YAML file
+		mapper.writer().writeValue(new File("/Users/faisalisse/Training/rest-api-development/src/main/resources/add-gaffer.yaml"), root);
+
+		OpenShiftClient osClient = new DefaultOpenShiftClient();
+		// Create Custom Resource Context
 //		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
 //				.Builder()
 //				.withGroup("gchq.gov.uk")
@@ -93,7 +109,7 @@ public class GraphController {
 //				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
 //		// Create Custom Resource
 //		osClient.customResource(context).create("default", dummyObject);
-		return ResponseEntity.ok(new Graph(graph.getGraphName(), graph.getCurrentState()));
+		return ResponseEntity.ok(new Graph(graph.getGraphId(), graph.getDescription()));
 	}
 
 	@PostMapping("auth")

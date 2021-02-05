@@ -2,31 +2,33 @@ package com.example.springboottest;
 
 public class Graph {
 
-	private  String graphName;
-	private  String currentState;
+	private  String graphId;
+	private  String description;
+
+
 
 	public Graph() {
 	}
-	public Graph(String graphName, String currentState) {
-		this.graphName = graphName;
-		this.currentState = currentState;
+	public Graph(String graphId, String description) {
+		this.graphId = graphId;
+		this.description = description;
 	}
 
 
-	public  void setGraphName(String graphName) {
-		this.graphName = graphName;
+	public  void setGraphId(String graphId) {
+		this.graphId = graphId;
 	}
 
-	public String getGraphName() {
-		return graphName;
+	public String getGraphId() {
+		return graphId;
 	}
 
-	public String getCurrentState() {
-		return currentState;
+	public String getDescription() {
+		return description;
 	}
 
-	public  void setCurrentState(String currentState) {
-		this.currentState = currentState;
+	public  void setDescription(String description) {
+		this.description = description;
 	}
 
 }
