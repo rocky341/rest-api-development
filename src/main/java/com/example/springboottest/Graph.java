@@ -31,4 +31,8 @@ public class Graph {
 		this.description = description;
 	}
 
+	@Override
+	public String toString() {
+		return "{\"graphId\":\"graphId\",\"description\":\"description\"}";
+	}
 }
