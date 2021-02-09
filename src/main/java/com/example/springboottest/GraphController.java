@@ -30,9 +30,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins="*")
 @RestController
-@RequestMapping("/")
 public class GraphController {
 
 	@Autowired
@@ -47,7 +46,9 @@ public class GraphController {
 	private static final String template = "Hello, %s!";
 	private final AtomicLong counter = new AtomicLong();
 
-	@GetMapping("graphs")
+	private JwtResponse jwtResponse;
+
+	@GetMapping("/graphs")
 	public List<Graph> graph(@RequestParam(value = "name", defaultValue = "gaffer") String name) {
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 
@@ -81,7 +82,7 @@ public class GraphController {
 		return graphList;
 	}
 
-	@PostMapping(path = "graphs", consumes = "application/json", produces = "application/json")
+	@PostMapping(path = "/graphs", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<?> graph(@RequestBody Graph graph) throws IOException {
 
 //		try (InputStream resourceAsStream = GraphController.class.getResourceAsStream("/add-gaffer.yaml")) {
@@ -99,27 +100,27 @@ public class GraphController {
 //			mapper.writer().writeValue(output, root);
 //		}
 
-		OpenShiftClient osClient = new DefaultOpenShiftClient();
-		// Create Custom Resource Context
-		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
-				.Builder()
-				.withGroup("gchq.gov.uk")
-				.withKind("Gaffer")
-				.withName("gaffers.gchq.gov.uk")
-				.withPlural("gaffers")
-				.withScope("Namespaced")
-				.withVersion("v1")
-				.build();
-		// Load from Yaml
-		Map<String, Object> dummyObject = osClient.customResource(context)
-				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
-		// Create Custom Resource
-		osClient.customResource(context).create("default", dummyObject);
+//		OpenShiftClient osClient = new DefaultOpenShiftClient();
+//		// Create Custom Resource Context
+//		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
+//				.Builder()
+//				.withGroup("gchq.gov.uk")
+//				.withKind("Gaffer")
+//				.withName("gaffers.gchq.gov.uk")
+//				.withPlural("gaffers")
+//				.withScope("Namespaced")
+//				.withVersion("v1")
+//				.build();
+//		// Load from Yaml
+//		Map<String, Object> dummyObject = osClient.customResource(context)
+//				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
+//		// Create Custom Resource
+//		osClient.customResource(context).create("default", dummyObject);
 
 		return new ResponseEntity(HttpStatus.CREATED);
 	}
 
-	@PostMapping("auth")
+	@PostMapping("/auth")
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
 
 		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
@@ -128,8 +129,8 @@ public class GraphController {
 				.loadUserByUsername(authenticationRequest.getUsername());
 
 		final String token = jwtTokenUtil.generateToken(userDetails);
-
-		return ResponseEntity.ok(new JwtResponse(token));
+		jwtResponse = new JwtResponse((token));
+		return ResponseEntity.ok(token);
 	}
 
 	private void authenticate(String username, String password) throws Exception {
@@ -142,7 +143,7 @@ public class GraphController {
 		}
 	}
 
-	@DeleteMapping("graphs/{graphId}")
+	@DeleteMapping("/graphs/{graphId}")
 	public String deleteGraph(@PathVariable String graphId){
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 		Boolean deleted = osClient.customResourceDefinitions().withName(graphId).delete();
