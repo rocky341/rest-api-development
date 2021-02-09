@@ -1,6 +1,7 @@
 package com.example.springboottest;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -93,29 +96,35 @@ public class GraphController {
 //			jsonNode.put("graphId", graph.getGraphId());
 //			jsonNode.put("description", graph.getDescription());
 //
-//			URL resourceUrl = getClass().getResource("/add-gaffer.yaml");
-//			File file = new File(resourceUrl.getPath());
-//			OutputStream output = new FileOutputStream(file);
+//			final Resource fileResource = resourceLoader.getResource("classpath:add-gaffer.yaml");
+//			File file =  fileResource.getFile();
 //			// Write changes to the YAML file
-//			mapper.writer().writeValue(output, root);
+//			mapper.writer().writeValue(file, root);
 //		}
 
-//		OpenShiftClient osClient = new DefaultOpenShiftClient();
-//		// Create Custom Resource Context
-//		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
-//				.Builder()
-//				.withGroup("gchq.gov.uk")
-//				.withKind("Gaffer")
-//				.withName("gaffers.gchq.gov.uk")
-//				.withPlural("gaffers")
-//				.withScope("Namespaced")
-//				.withVersion("v1")
-//				.build();
-//		// Load from Yaml
-//		Map<String, Object> dummyObject = osClient.customResource(context)
-//				.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
-//		// Create Custom Resource
-//		osClient.customResource(context).create("default", dummyObject);
+
+		String rawJsonCustomResourceObj = "{\"apiVersion\":\"jungle.example.com/v1\"," +
+				"\"kind\":\"Animal\",\"metadata\": {\"name\": \"walrus\"}," +
+				"\"spec\": { \"graph\": { \"config\":{\"graphId\": \" "+ graph.getGraphId()+ "\", \"description\": \" "+ graph.getDescription() +"\"} } }}";
+
+		OpenShiftClient osClient = new DefaultOpenShiftClient();
+		// Create Custom Resource Context
+		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
+				.Builder()
+				.withGroup("gchq.gov.uk")
+				.withKind("Gaffer")
+				.withName("gaffers.gchq.gov.uk")
+				.withPlural("gaffers")
+				.withScope("Namespaced")
+				.withVersion("v1")
+				.build();
+		// Load from Yaml
+		Map<String, Object> dummyObject = osClient.customResource(context).create("gaffer-graphs", rawJsonCustomResourceObj);
+		//Map<String, Object> dummyObject = osClient.customResource(context)
+		//		.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
+		// Create Custom Resource
+		osClient.customResource(context).create("default", dummyObject);
+
 
 		return new ResponseEntity(HttpStatus.CREATED);
 	}
