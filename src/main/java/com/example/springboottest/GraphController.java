@@ -1,7 +1,8 @@
 package com.example.springboottest;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
-@ComponentScan()
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/")
@@ -83,18 +83,20 @@ public class GraphController {
 	@PostMapping(path = "addGraph", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<?> graph(@RequestBody Graph graph) throws IOException {
 
-		File addGafferFile = new File("src/main/resources/add-gaffer.yaml");
+		try (InputStream resourceAsStream = GraphController.class.getResourceAsStream("/add-gaffer.yaml")) {
+			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+			// Parse the YAML file
+			ObjectNode root = (ObjectNode) mapper.readTree(resourceAsStream);
+			ObjectNode jsonNode = (ObjectNode)root.findPath("config");
+			jsonNode.put("graphId", graph.getGraphId());
+			jsonNode.put("description", graph.getDescription());
 
-		//Update add-graffer.yaml file
-		// Create an ObjectMapper mapper for YAML
-		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        // Parse the YAML file
-		ObjectNode root = (ObjectNode) mapper.readTree(addGafferFile);
-		ObjectNode jsonNode = (ObjectNode)root.findPath("config");
-		jsonNode.put("graphId", graph.getGraphId());
-		jsonNode.put("description", graph.getDescription());
-		// Write changes to the YAML file
-		mapper.writer().writeValue(addGafferFile, root);
+			URL resourceUrl = getClass().getResource("/add-gaffer.yaml");
+			File file = new File(resourceUrl.getPath());
+			OutputStream output = new FileOutputStream(file);
+			// Write changes to the YAML file
+			mapper.writer().writeValue(output, root);
+		}
 
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 		// Create Custom Resource Context
