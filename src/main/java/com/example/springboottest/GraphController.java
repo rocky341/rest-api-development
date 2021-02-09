@@ -83,20 +83,20 @@ public class GraphController {
 	@PostMapping(path = "addGraph", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<?> graph(@RequestBody Graph graph) throws IOException {
 
-		try (InputStream resourceAsStream = GraphController.class.getResourceAsStream("/add-gaffer.yaml")) {
-			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-			// Parse the YAML file
-			ObjectNode root = (ObjectNode) mapper.readTree(resourceAsStream);
-			ObjectNode jsonNode = (ObjectNode)root.findPath("config");
-			jsonNode.put("graphId", graph.getGraphId());
-			jsonNode.put("description", graph.getDescription());
-
-			URL resourceUrl = getClass().getResource("/add-gaffer.yaml");
-			File file = new File(resourceUrl.getPath());
-			OutputStream output = new FileOutputStream(file);
-			// Write changes to the YAML file
-			mapper.writer().writeValue(output, root);
-		}
+//		try (InputStream resourceAsStream = GraphController.class.getResourceAsStream("/add-gaffer.yaml")) {
+//			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+//			// Parse the YAML file
+//			ObjectNode root = (ObjectNode) mapper.readTree(resourceAsStream);
+//			ObjectNode jsonNode = (ObjectNode)root.findPath("config");
+//			jsonNode.put("graphId", graph.getGraphId());
+//			jsonNode.put("description", graph.getDescription());
+//
+//			URL resourceUrl = getClass().getResource("/add-gaffer.yaml");
+//			File file = new File(resourceUrl.getPath());
+//			OutputStream output = new FileOutputStream(file);
+//			// Write changes to the YAML file
+//			mapper.writer().writeValue(output, root);
+//		}
 
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
 		// Create Custom Resource Context
