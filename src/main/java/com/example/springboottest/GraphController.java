@@ -30,7 +30,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins="*")
+@CrossOrigin
 @RestController
 public class GraphController {
 
