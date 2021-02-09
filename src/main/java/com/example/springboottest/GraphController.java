@@ -20,6 +20,7 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -54,33 +55,33 @@ public class GraphController {
 
 		String jobName = "job-" + randomNumber;
 
-		Job aJob = new JobBuilder()
-				.withNewMetadata().withName(jobName).addToLabels("job-name", jobName).endMetadata()
-				.withNewSpec()
-				.withNewTemplate()
-				.withNewMetadata().addToLabels("job-name", jobName).endMetadata()
-				.withNewSpec()
-				.withRestartPolicy("Never")
-				.addNewContainer().withName(jobName).withImage("registry.access.redhat.com/rhel7/rhel:latest")
-				.withCommand("/bin/bash", "-c", "for i in {1..5}; do echo hi stuff; sleep 5; done")
-				.withNewResources()
-				.addToRequests("cpu", new Quantity("100m"))
-				.addToRequests("memory", new Quantity("128Mi"))
-				.addToLimits("cpu", new Quantity("100m"))
-				.addToLimits("memory", new Quantity("128Mi"))
-				.endResources()
-				.endContainer()
-				.endSpec()
-				.endTemplate()
-				.endSpec().build();
-
-		osClient.batch().jobs().create(aJob);
+//		Job aJob = new JobBuilder()
+//				.withNewMetadata().withName(jobName).addToLabels("job-name", jobName).endMetadata()
+//				.withNewSpec()
+//				.withNewTemplate()
+//				.withNewMetadata().addToLabels("job-name", jobName).endMetadata()
+//				.withNewSpec()
+//				.withRestartPolicy("Never")
+//				.addNewContainer().withName(jobName).withImage("registry.access.redhat.com/rhel7/rhel:latest")
+//				.withCommand("/bin/bash", "-c", "for i in {1..5}; do echo hi stuff; sleep 5; done")
+//				.withNewResources()
+//				.addToRequests("cpu", new Quantity("100m"))
+//				.addToRequests("memory", new Quantity("128Mi"))
+//				.addToLimits("cpu", new Quantity("100m"))
+//				.addToLimits("memory", new Quantity("128Mi"))
+//				.endResources()
+//				.endContainer()
+//				.endSpec()
+//				.endTemplate()
+//				.endSpec().build();
+//
+//		osClient.batch().jobs().create(aJob);
 		ArrayList<Graph> graphList = new ArrayList<>();
 		graphList.add(new Graph("OurGraph", "YES"));
 		return graphList;
 	}
 
-	@PostMapping(path = "addGraph", consumes = "application/json", produces = "application/json")
+	@PostMapping(path = "graphs", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<?> graph(@RequestBody Graph graph) throws IOException {
 
 //		try (InputStream resourceAsStream = GraphController.class.getResourceAsStream("/add-gaffer.yaml")) {
@@ -115,7 +116,7 @@ public class GraphController {
 		// Create Custom Resource
 		osClient.customResource(context).create("default", dummyObject);
 
-		return ResponseEntity.ok(new Graph(graph.getGraphId(), graph.getDescription()));
+		return new ResponseEntity(HttpStatus.CREATED);
 	}
 
 	@PostMapping("auth")
@@ -141,10 +142,10 @@ public class GraphController {
 		}
 	}
 
-	@DeleteMapping("deleteGraph/{id}")
-	public String deleteGraph(@PathVariable String id){
+	@DeleteMapping("graphs/{graphId}")
+	public String deleteGraph(@PathVariable String graphId){
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
-		Boolean deleted = osClient.customResourceDefinitions().withName(id).delete();
+		Boolean deleted = osClient.customResourceDefinitions().withName(graphId).delete();
 		return "Record Deleted " + deleted;
 	}
 }
