@@ -108,6 +108,7 @@ public class GraphController {
 				"\"spec\": { \"graph\": { \"config\":{\"graphId\": \" "+ graph.getGraphId()+ "\", \"description\": \" "+ graph.getDescription() +"\"} } }}";
 
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
+
 		// Create Custom Resource Context
 		CustomResourceDefinitionContext context = new CustomResourceDefinitionContext
 				.Builder()
@@ -119,11 +120,11 @@ public class GraphController {
 				.withVersion("v1")
 				.build();
 		// Load from Yaml
-		Map<String, Object> dummyObject = osClient.customResource(context).create("gaffer-graphs", rawJsonCustomResourceObj);
+		 osClient.customResource(context).create("gaffer-graphs", rawJsonCustomResourceObj);
 		//Map<String, Object> dummyObject = osClient.customResource(context)
 		//		.load(GraphController.class.getResourceAsStream("/add-gaffer.yaml"));
 		// Create Custom Resource
-		osClient.customResource(context).create("default", dummyObject);
+		//Map<String, Object> aDefault = osClient.customResource(context).create("default", dummyObject);
 
 
 		return new ResponseEntity(HttpStatus.CREATED);
