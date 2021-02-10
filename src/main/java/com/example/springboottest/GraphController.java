@@ -103,8 +103,9 @@ public class GraphController {
 //		}
 
 
-		String rawJsonCustomResourceObj = "{\"apiVersion\":\"jungle.example.com/v1\"," +
-				"\"kind\":\"Animal\",\"metadata\": {\"name\": \"walrus\"}," +
+
+		String rawJsonCustomResourceObj = "{\"apiVersion\":\"gchq.gov.uk/v1\"," +
+				"\"kind\":\"Gaffer\",\"metadata\": {\"name\": \"my-gaffer\", \"namespace\": \"gaffer-graphs\"}" +
 				"\"spec\": { \"graph\": { \"config\":{\"graphId\": \" "+ graph.getGraphId()+ "\", \"description\": \" "+ graph.getDescription() +"\"} } }}";
 
 		OpenShiftClient osClient = new DefaultOpenShiftClient();
